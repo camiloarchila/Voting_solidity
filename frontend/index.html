@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+    <style>
+      .header {
+        font-family: sans-serif;
+        text-align: center;
+      }
+    </style>
+    <title>Sistema de Votaciones</title>
+  </head>
+  <body>
+    <h1>Sistema de votaciones</h1>
+
+    <div>
+      <p>Tiempo inicio: <span id="startdate"></span></p>
+      <p>Tiempo Finalizacion: <span id="enddate"></span></p>
+    </div>
+
+    <h2>Realiza tu voto</h2>
+    <label for="opcion">Opcion de votacion</label>
+    <input type="number" id="opcion" min="1" max="5" />
+    <button onclick="onVote()">Votar</button>
+
+    <h2>Recuento de votos</h2>
+    <div id="finalvotes"></div>
+
+    <script type="text/javascript">
+      let web3;
+
+      let contractABI = [
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "time_Start",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "time_End",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "alreadyVote",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "canVote",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "intime",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "options",
+          outputs: [
+            {
+              internalType: "string",
+              name: "",
+              type: "string",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "timeEnd",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "timeStart",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "totaloptions",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "candidate",
+              type: "uint256",
+            },
+          ],
+          name: "vote",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "voteCount",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+      ];
+
+      let contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+
+      let contract;
+
+      async function loadWeb3() {
+        if (window.ethereum) {
+          web3 = new Web3(window.ethereum);
+          window.ethereum.enable();
+        } else {
+          alert("No Ethereum provider found!");
+        }
+      }
+
+      async function onVote() {
+        const account = (await web3.eth.getAccounts())[0];
+
+        const candidate = parseInt(document.getElementById("opcion").value);
+
+        const rc = await contract.methods.vote(candidate);
+        // updatevotes(candidate)
+        console.log(rc);
+      }
+
+      async function updatevotes(candidate) {
+        var numcandidate = candidate.toString();
+        const numvotes = document.getElementById(numcandidate);
+        console.log(await contract.methods.votesfor(numcandidate).call());
+        numvotes.innerHTML = await contract.methods.votesfor(numcandidate);
+        console.log(numcandidate);
+      }
+
+      async function load() {
+        await loadWeb3();
+        contract = new web3.eth.Contract(contractABI, contractAddress);
+        console.log(await contract.methods.timeStart().call());
+      }
+      load();
+    </script>
+  </body>
+</html>
